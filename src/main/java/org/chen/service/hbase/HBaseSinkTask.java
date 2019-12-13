@@ -13,6 +13,7 @@ import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.TopicPartition;
@@ -56,6 +57,8 @@ public class HBaseSinkTask extends SinkTask {
     conf.set("hbase.master.kerberos.principal", "hbase/_HOST@REALM.COM");
     conf.set("hbase.client.kerberos.principal", username + "@REALM.COM");
     conf.set("hbase.client.keytab.password", password);
+    conf.set("hbase.client.principal.reuse", "true");
+    conf.set("hbase.client.write.buffer", "1048576");
     conf.set(HConstants.ZOOKEEPER_QUORUM, zkServers);
     conf.setInt(HConstants.ZOOKEEPER_CLIENT_PORT, HConstants.DEFAULT_ZOOKEPER_CLIENT_PORT);
     conf.set(HConstants.ZOOKEEPER_ZNODE_PARENT, HConstants.DEFAULT_ZOOKEEPER_ZNODE_PARENT);
@@ -89,6 +92,7 @@ public class HBaseSinkTask extends SinkTask {
       return;
     }
     mutation.setDurability(Durability.SKIP_WAL);
+    mutation.setAttribute("OFFSET", Bytes.toBytes(record.kafkaOffset()));
     if (mutation instanceof Delete) {
       Delete delete = (Delete)mutation;
       for (Cell kv : value.getCells()) {
