@@ -9,7 +9,6 @@ import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
@@ -91,7 +90,6 @@ public class HBaseSinkTask extends SinkTask {
     } else {
       return;
     }
-    mutation.setDurability(Durability.SKIP_WAL);
     mutation.setAttribute("OFFSET", Bytes.toBytes(record.kafkaOffset()));
     if (mutation instanceof Delete) {
       Delete delete = (Delete)mutation;
